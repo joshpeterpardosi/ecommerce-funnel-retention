@@ -26,8 +26,10 @@ def load_sql(filename: str) -> str:
     return Path(f"sql/{filename}").read_text(encoding="utf-8")
 
 if not Path("data/events.parquet").exists():
-    st.error("Dataset missing in `data/` directory. Run `python scripts/generate_data.py` first.")
-    st.stop()
+    import subprocess
+    st.info("Generating Parquet dataset (500k events)...")
+    subprocess.run(["python", "scripts/generate_data.py"], check=True)
+    st.rerun()
 
 st.sidebar.title("⚡ Analytics")
 st.sidebar.markdown("---")
