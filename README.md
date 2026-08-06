@@ -4,6 +4,14 @@ Production-grade analytics pipeline and interactive 4-page Streamlit dashboard p
 
 ---
 
+## 💡 Business Value & ROI Impact
+
+- **Funnel Drop-off Minimization**: Pinpoints precise user friction points between product browsing, cart addition, and checkout stages to maximize overall conversion rates.
+- **Cohort Retention Tracking**: Visualizes monthly user decay matrices to identify baseline churn trends and measure long-term customer lifetime value (LTV).
+- **Targeted Customer RFM Segmentation**: Uses 4-quantile Recency, Frequency, and Monetary scoring to separate high-value *Champions* from *At-Risk* customers for targeted re-engagement.
+
+---
+
 ## 🏗️ Architecture Overview
 
 ```
@@ -29,6 +37,7 @@ ecommerce-funnel-retention/
 │   └── config.toml            # Custom dark theme configuration
 ├── app.py                     # 4-Page interactive Streamlit dashboard
 ├── .gitignore
+├── LICENSE                    # MIT License
 ├── requirements.txt
 └── README.md
 ```
@@ -79,5 +88,10 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ## ⚡ Performance Benchmark
 - **Dataset Size**: 500,000 funnel events + 25,000 customer records + 20,000 transactions.
-- **DuckDB Query Latency**: $< 50\text{ ms}$ in-memory Parquet execution.
-- **Test Suite Execution**: $0.52\text{ s}$ total test time.
+- **DuckDB Query Latency**: < 50 ms in-memory Parquet execution.
+- **Test Suite Execution**: 0.52s total test time.
+
+---
+
+## 📄 License
+Distributed under the [MIT License](file:///C:/Josh/Project/portoflio%20project%27s/ecommerce-funnel-retention/LICENSE).
