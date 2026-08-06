@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Funnel Analytics Architecture Mind Map</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+        }
+        #header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        h1 { font-size: 1.4rem; font-weight: 700; color: #38bdf8; margin-bottom: 4px; }
+        p { font-size: 0.85rem; color: #94a3b8; }
+        #mynetwork {
+            width: 100vw;
+            height: 100vh;
+        }
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            font-size: 0.8rem;
+            display: flex;
+            gap: 16px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>⚡ Architecture Mind Map</h1>
+        <p>Interactive System Topology & Component Graph</p>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><span class="dot" style="background:#38bdf8;"></span> Streamlit UI</div>
+        <div class="legend-item"><span class="dot" style="background:#a855f7;"></span> DuckDB SQL</div>
+        <div class="legend-item"><span class="dot" style="background:#34d399;"></span> Parquet Data</div>
+        <div class="legend-item"><span class="dot" style="background:#fbbf24;"></span> Python Core</div>
+        <div class="legend-item"><span class="dot" style="background:#f43f5e;"></span> Pytest Suite</div>
+    </div>
+
+    <div id="mynetwork"></div>
+
+    <script type="text/javascript">
+        const nodes = new vis.DataSet([
+            { id: 1, label: "app.py\n(Streamlit Dashboard)", color: "#38bdf8", font: { color: "#fff", size: 16, strokeWidth: 2 } },
+            
+            { id: 2, label: "Overview & Quality", color: "#0284c7", font: { color: "#fff" } },
+            { id: 3, label: "Conversion Funnel", color: "#0284c7", font: { color: "#fff" } },
+            { id: 4, label: "Cohort Retention", color: "#0284c7", font: { color: "#fff" } },
+            { id: 5, label: "RFM Segmentation", color: "#0284c7", font: { color: "#fff" } },
+
+            { id: 6, label: "sql/funnel.sql\n(LAG & FIRST_VALUE)", color: "#a855f7", font: { color: "#fff" } },
+            { id: 7, label: "sql/cohort_retention.sql\n(DATEDIFF)", color: "#a855f7", font: { color: "#fff" } },
+            { id: 8, label: "sql/rfm_segmentation.sql\n(NTILE 4)", color: "#a855f7", font: { color: "#fff" } },
+            { id: 9, label: "sql/data_quality.sql\n(Multi-UNION)", color: "#a855f7", font: { color: "#fff" } },
+
+            { id: 10, label: "data/events.parquet\n(500,000 rows)", color: "#34d399", font: { color: "#000" } },
+            { id: 11, label: "data/customers.parquet\n(25,000 rows)", color: "#34d399", font: { color: "#000" } },
+            { id: 12, label: "data/transactions.parquet\n(20,224 rows)", color: "#34d399", font: { color: "#000" } },
+
+            { id: 13, label: "src/funnel.py", color: "#fbbf24", font: { color: "#000" } },
+            { id: 14, label: "src/retention.py", color: "#fbbf24", font: { color: "#000" } },
+
+            { id: 15, label: "tests/test_funnel.py", color: "#f43f5e", font: { color: "#fff" } },
+            { id: 16, label: "tests/test_retention.py", color: "#f43f5e", font: { color: "#fff" } },
+
+            { id: 17, label: "scripts/generate_data.py", color: "#94a3b8", font: { color: "#000" } }
+        ]);
+
+        const edges = new vis.DataSet([
+            { from: 1, to: 2 },
+            { from: 1, to: 3 },
+            { from: 1, to: 4 },
+            { from: 1, to: 5 },
+
+            { from: 2, to: 9 },
+            { from: 3, to: 6 },
+            { from: 4, to: 7 },
+            { from: 5, to: 8 },
+
+            { from: 6, to: 10 },
+            { from: 7, to: 10 },
+            { from: 8, to: 12 },
+
+            { from: 9, to: 10 },
+            { from: 9, to: 11 },
+            { from: 9, to: 12 },
+
+            { from: 17, to: 10 },
+            { from: 17, to: 11 },
+            { from: 17, to: 12 },
+
+            { from: 15, to: 13 },
+            { from: 16, to: 14 }
+        ]);
+
+        const container = document.getElementById('mynetwork');
+        const data = { nodes: nodes, edges: edges };
+        const options = {
+            nodes: {
+                shape: 'box',
+                margin: 12,
+                borderWidth: 2,
+                shadow: true
+            },
+            edges: {
+                width: 2,
+                color: { color: '#475569', highlight: '#38bdf8' },
+                smooth: { type: 'continuous' }
+            },
+            physics: {
+                barnesHut: {
+                    gravitationalConstant: -3000,
+                    springLength: 120
+                }
+            }
+        };
+        const network = new vis.Network(container, data, options);
+    </script>
+</body>
+</html>
