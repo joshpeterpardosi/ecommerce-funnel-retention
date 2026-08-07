@@ -19,3 +19,9 @@ data/*.parquet
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local Learning Visuals
+graph.html
+graph.json
+project_visual_story.html
+
