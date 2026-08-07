@@ -23,10 +23,10 @@ The project is structured into 5 decoupled analytical layers:
 ### A. Dashboard UI Hub (`app.py`)
 - **Role**: 4-page Streamlit application rendering Plotly interactive visualizers and KPI metrics.
 - **Connections**:
-  - `Overview`: Queries [`sql/data_quality.sql`](file:///C:/Josh/Project/portoflio%20project%27s/ecommerce-funnel-retention/sql/data_quality.sql) & raw `events.parquet`.
-  - `Funnel Page`: Queries [`sql/funnel.sql`](file:///C:/Josh/Project/portoflio%20project%27s/ecommerce-funnel-retention/sql/funnel.sql) and builds `go.Funnel` stage progression charts.
-  - `Cohort Page`: Queries [`sql/cohort_retention.sql`](file:///C:/Josh/Project/portoflio%20project%27s/ecommerce-funnel-retention/sql/cohort_retention.sql) and builds `px.imshow` monthly decay heatmaps.
-  - `RFM Page`: Queries [`sql/rfm_segmentation.sql`](file:///C:/Josh/Project/portoflio%20project%27s/ecommerce-funnel-retention/sql/rfm_segmentation.sql) and highlights *Champions* vs *At-Risk* segments.
+  - `Overview`: Queries `sql/data_quality.sql` & raw `events.parquet`.
+  - `Funnel Page`: Queries `sql/funnel.sql` and builds `go.Funnel` stage progression charts.
+  - `Cohort Page`: Queries `sql/cohort_retention.sql` and builds `px.imshow` monthly decay heatmaps.
+  - `RFM Page`: Queries `sql/rfm_segmentation.sql` and highlights *Champions* vs *At-Risk* segments.
 
 ### B. High-Performance SQL Query Engine (`sql/`)
 - **Role**: Pure SQL analytical transformations executed in-memory by DuckDB directly over zero-copy Parquet tables.

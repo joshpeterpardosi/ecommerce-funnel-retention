@@ -57,10 +57,10 @@ if page == "📊 Overview & Quality Audit":
     """).iloc[0]
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total Customers", f"{int(kpis['total_customers']):,}", delta="+12.4% MoM")
-    c2.metric("Total Events", f"{int(kpis['total_events']):,}", delta="+8.1% vs prev")
-    c3.metric("Completed Orders", f"{int(kpis['total_orders']):,}", delta="+15.3% MoM")
-    c4.metric("Total Revenue", f"${kpis['total_revenue']:,.2f}", delta="+$34,210 MoM")
+    c1.metric("Total Customers", f"{int(kpis['total_customers']):,}")
+    c2.metric("Total Events", f"{int(kpis['total_events']):,}")
+    c3.metric("Completed Orders", f"{int(kpis['total_orders']):,}")
+    c4.metric("Total Revenue", f"${kpis['total_revenue']:,.2f}")
 
     st.write("")
     col_a, col_b = st.columns([1, 1])
