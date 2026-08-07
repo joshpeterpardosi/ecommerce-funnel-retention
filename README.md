@@ -39,8 +39,6 @@ ecommerce-funnel-retention/
 ├── .streamlit/
 │   └── config.toml            # Custom dark theme configuration
 ├── app.py                     # 4-Page interactive Streamlit dashboard
-├── graph.html                 # Interactive architecture topology graph (standalone)
-├── project_visual_story.html  # Visual story & infographic (standalone)
 ├── .gitignore
 ├── LICENSE                    # MIT License
 ├── requirements.txt
