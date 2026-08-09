@@ -1,9 +1,12 @@
-pandas>=2.0.0
-numpy>=1.24.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-pytest>=7.0.0
-duckdb>=0.9.0
-streamlit>=1.30.0
-plotly>=5.18.0
-pyarrow>=14.0.0
+# Upper bounds pin the next major release out of the resolver. Streamlit Cloud
+# resolves these fresh on every deploy, so an unbounded spec can silently pull a
+# breaking major (e.g. pandas 3.0) into a deploy that was never tested against it.
+# Verified working on pandas 2.3.3 / numpy 2.4.4 (local, Python 3.13) and
+# pandas 3.0.5 / numpy 2.5.2 / duckdb 1.5.5 (Streamlit Cloud, Python 3.14).
+pandas>=2.0.0,<4.0.0
+numpy>=1.24.0,<3.0.0
+pytest>=7.0.0,<10.0.0
+duckdb>=0.9.0,<2.0.0
+streamlit>=1.30.0,<2.0.0
+plotly>=5.18.0,<7.0.0
+pyarrow>=14.0.0,<25.0.0

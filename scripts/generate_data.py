@@ -33,14 +33,23 @@ def generate_datasets(output_dir: str = "data", total_events: int = 500_000, num
     
     print(f"Generating {total_events:,} funnel events...")
     cust_indices = np.random.randint(0, num_customers, size=total_events)
-    assigned_cust_ids = np.array(customer_ids)[cust_indices]
+    cust_id_lookup = np.asarray(customer_ids)
     base_signup = signup_dates.values[cust_indices]
-    
+
     added_seconds = np.random.randint(0, 180 * 86400, size=total_events)
     event_timestamps = pd.to_datetime(base_signup) + pd.to_timedelta(added_seconds, unit="s")
-    
+
+    # Store repeated string keys as Categorical: 500k rows collapse to int codes
+    # plus a small category index, instead of 500k separate Python strings.
+    assigned_cust_ids = pd.Categorical.from_codes(cust_indices, categories=cust_id_lookup)
+
     session_num = np.random.randint(1, 10, size=total_events)
-    session_ids = [f"SESS_{assigned_cust_ids[i]}_{session_num[i]}" for i in range(total_events)]
+    session_ids = pd.Categorical(
+        np.char.add(
+            np.char.add(np.char.add("SESS_", cust_id_lookup[cust_indices]), "_"),
+            session_num.astype(str),
+        )
+    )
     
     event_types = np.random.choice(
         ["page_view", "product_view", "add_to_cart", "checkout_start", "purchase"],
@@ -55,12 +64,17 @@ def generate_datasets(output_dir: str = "data", total_events: int = 500_000, num
         "checkout_start": "checkout",
         "purchase": "thank_you"
     }
-    page_categories = [page_category_map[et] for et in event_types]
-    
+    event_types = pd.Categorical(event_types)
+    page_categories = pd.Categorical(
+        event_types.rename_categories(page_category_map)
+    )
+
     event_devices = np.random.choice(["mobile", "desktop", "tablet"], size=total_events, p=[0.58, 0.34, 0.08])
-    
+
+    event_ids = np.char.add("EVT_", np.char.zfill(np.arange(1, total_events + 1).astype(str), 7))
+
     df_events = pd.DataFrame({
-        "event_id": [f"EVT_{i:07d}" for i in range(1, total_events + 1)],
+        "event_id": event_ids,
         "customer_id": assigned_cust_ids,
         "session_id": session_ids,
         "timestamp": event_timestamps,

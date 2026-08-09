@@ -8,8 +8,13 @@ WITH null_check AS (
 orphan_check AS (
     SELECT
         'Referential Integrity Audit' AS audit_category,
-        (SELECT COUNT(DISTINCT customer_id) FROM read_parquet('data/events.parquet') WHERE customer_id NOT IN (SELECT customer_id FROM read_parquet('data/customers.parquet'))) AS orphan_event_customers,
-        (SELECT COUNT(DISTINCT customer_id) FROM read_parquet('data/transactions.parquet') WHERE customer_id NOT IN (SELECT customer_id FROM read_parquet('data/customers.parquet'))) AS orphan_txn_customers
+        -- NOT EXISTS rather than NOT IN: a single NULL customer_id in the
+        -- subquery would make NOT IN return zero rows for every comparison,
+        -- silently reporting 0 orphans even when orphans exist.
+        (SELECT COUNT(DISTINCT e.customer_id) FROM read_parquet('data/events.parquet') e
+         WHERE NOT EXISTS (SELECT 1 FROM read_parquet('data/customers.parquet') c WHERE c.customer_id = e.customer_id)) AS orphan_event_customers,
+        (SELECT COUNT(DISTINCT t.customer_id) FROM read_parquet('data/transactions.parquet') t
+         WHERE NOT EXISTS (SELECT 1 FROM read_parquet('data/customers.parquet') c WHERE c.customer_id = t.customer_id)) AS orphan_txn_customers
 ),
 anomaly_check AS (
     SELECT

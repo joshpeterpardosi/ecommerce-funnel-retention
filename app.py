@@ -26,9 +26,12 @@ def load_sql(filename: str) -> str:
     return Path(f"sql/{filename}").read_text(encoding="utf-8")
 
 if not Path("data/events.parquet").exists():
-    import subprocess
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent / "scripts"))
+    from generate_data import generate_datasets
+
     st.info("Generating Parquet dataset (500k events)...")
-    subprocess.run(["python", "scripts/generate_data.py"], check=True)
+    generate_datasets()
     st.rerun()
 
 st.sidebar.title("⚡ Analytics")
