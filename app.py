@@ -102,12 +102,12 @@ if page == "📊 Overview & Quality Audit":
         """)
         fig_donut = px.pie(df_evt, values='count', names='event_type', hole=0.5, color_discrete_sequence=px.colors.sequential.Blues_r)
         fig_donut.update_layout(margin=dict(t=20, b=20, l=20, r=20))
-        st.plotly_chart(fig_donut, use_container_width=True)
+        st.plotly_chart(fig_donut, width='stretch')
 
     with col_b:
         st.subheader("Automated Data Quality Audit")
         df_dq = run_query(load_sql("data_quality.sql"))
-        st.dataframe(df_dq, use_container_width=True, hide_index=True)
+        st.dataframe(df_dq, width='stretch', hide_index=True)
 
 elif page == "🎯 Conversion Funnel":
     st.title("Conversion Funnel Analysis")
@@ -138,7 +138,7 @@ elif page == "🎯 Conversion Funnel":
             marker=dict(color=blue_gradient[:len(df_filtered)])
         ))
         fig_funnel.update_layout(margin=dict(t=20, b=20, l=20, r=20))
-        st.plotly_chart(fig_funnel, use_container_width=True)
+        st.plotly_chart(fig_funnel, width='stretch')
 
     with col_b:
         st.subheader("Step Metrics & Drop-offs")
@@ -152,7 +152,7 @@ elif page == "🎯 Conversion Funnel":
                 "step_conversion_pct": st.column_config.NumberColumn("Step Conversion", format="%.2f%%"),
                 "dropoff_pct": st.column_config.NumberColumn("Drop-off Rate", format="%.2f%%"),
             },
-            use_container_width=True,
+            width='stretch',
             hide_index=True
         )
 
@@ -179,7 +179,7 @@ elif page == "🔄 Cohort Retention":
         aspect="auto"
     )
     fig_heatmap.update_layout(margin=dict(t=30, b=20, l=20, r=20))
-    st.plotly_chart(fig_heatmap, use_container_width=True)
+    st.plotly_chart(fig_heatmap, width='stretch')
 
     st.subheader("Cohort Retention Matrix")
     
@@ -196,7 +196,7 @@ elif page == "🔄 Cohort Retention":
     st.dataframe(
         df_table,
         column_config=col_cfg,
-        use_container_width=True,
+        width='stretch',
         hide_index=True
     )
 
@@ -224,7 +224,7 @@ elif page == "💎 RFM Segmentation":
             hovertemplate="<b>%{x}</b><br>Total Revenue: $%{y:,.2f}<extra></extra>"
         )
         fig_bar.update_layout(showlegend=False, margin=dict(t=20, b=20, l=20, r=20))
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width='stretch')
 
     with col_b:
         st.subheader("Segment Breakdown")
@@ -238,6 +238,6 @@ elif page == "💎 RFM Segmentation":
                 "avg_monetary_spend": st.column_config.NumberColumn("Avg Spend", format="$%.2f"),
                 "total_segment_revenue": st.column_config.NumberColumn("Total Revenue", format="$%.2f"),
             },
-            use_container_width=True,
+            width='stretch',
             hide_index=True
         )
