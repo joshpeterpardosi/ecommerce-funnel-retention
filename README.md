@@ -30,10 +30,10 @@ regenerate deterministically and are what the live dashboard displays.
 | `checkout_start` | 3,558 | 14.23% | 49.20% |
 | `purchase` | 2,033 | 8.13% | 42.86% |
 
-- **$398,852.86** in completed revenue across **7,377** completed orders from **2,000** purchasing customers
+- **$402,424.21** in completed revenue across **7,468** completed orders from **1,999** purchasing customers
 - **The steepest leak is `product_view` → `add_to_cart` (54.50%)**, the single largest recoverable drop in the journey
-- **113 Champions** (top RFM quartile on all three dimensions) average **$390.58** spend versus **$105.25** for the churned segment — a 3.7× gap
-- **54.2%** average month-1 cohort retention
+- **113 Champions** (top RFM quartile on all three dimensions) average **$394.47** spend versus **$102.02** for the churned segment — a 3.9× gap
+- Cohort retention decays **100% → 75.2% → 56.8% → 37.2% → 21.9%** over the first four months
 
 > These describe synthetic data whose conversion behaviour is configured, not
 > observed. They demonstrate that the pipeline computes the metrics correctly;
@@ -174,10 +174,10 @@ Query performance on 507,928 events + 25,000 customers + 8,068 transactions
 
 | Query | Latency |
 |---|---|
-| `funnel.sql` (5 sequential session joins + windowing) | ~175 ms |
-| `cohort_retention.sql` | ~119 ms |
-| `data_quality.sql` | ~60 ms |
-| `rfm_segmentation.sql` | ~13 ms |
+| `funnel.sql` (5 sequential session joins + windowing) | ~179 ms |
+| `cohort_retention.sql` | ~109 ms |
+| `data_quality.sql` | ~59 ms |
+| `rfm_segmentation.sql` | ~14 ms |
 | **Full pytest suite (10 tests)** | **~1.3 s** |
 
 ---
@@ -187,6 +187,7 @@ Query performance on 507,928 events + 25,000 customers + 8,068 transactions
 - **Synthetic Data**: All customer profiles, event logs, and purchase transactions are generated synthetically by `scripts/generate_data.py`. They have not been validated against real user traffic or production environments.
 - **Funnel Sequencing Assumption**: The funnel credits a stage only when it occurs *after* the preceding stage within the same `session_id`. `scripts/generate_data.py` builds events session by session to satisfy this, assigning each customer a maximum stage they will ever reach so the distinct-customer funnel is stable regardless of session volume. Conversion rates are therefore a property of the generator's configured intent distribution, not a discovered insight.
 - **Device Attribution**: Device is treated as a fixed customer attribute rather than a per-session one, so the per-device funnels partition the customer base cleanly instead of counting a customer once per device they used.
+- **Activity Timing**: Return visits are drawn from an exponential decay after signup and clamped to the dataset window, so retention falls month over month and no event is dated beyond `2026-07-31`. Recent cohorts therefore have fewer observable months, producing the triangular cohort matrix a real retention report has. The decay rate is a generator parameter, not a measured behaviour.
 - **RFM Logic Assumptions**: RFM scores use equal 4-quantile splits (`NTILE(4)`) across the customer base. Segment labels (e.g. Champions, At Risk) are derived from relative quartile rankings rather than fixed business threshold rules.
 
 ---

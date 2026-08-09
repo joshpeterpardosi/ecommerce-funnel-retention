@@ -47,6 +47,9 @@ def generate_datasets(
     start_date = pd.Timestamp("2025-01-01")
     end_date = pd.Timestamp("2026-07-31")
 
+    # Signups spread across the whole window, so the most recent cohorts have
+    # little history left. That produces the triangular cohort matrix a real
+    # retention report has, rather than a full rectangle.
     signup_dates = start_date + pd.to_timedelta(
         rng.integers(0, (end_date - start_date).days, size=num_customers), unit="D"
     )
@@ -121,9 +124,18 @@ def generate_datasets(
     gaps = rng.integers(30, 600, size=ev_session.size)  # 0.5-10 min between hits
     offsets = pd.Series(gaps).groupby(ev_session).cumsum().to_numpy() - gaps
 
-    session_start = (
-        signup_dates.values[session_customer_idx]
-        + pd.to_timedelta(rng.integers(0, 180 * 86400, size=total_sessions), unit="s")
+    # Return visits decay after signup rather than being spread uniformly, so
+    # cohort retention falls month over month. A uniform offset makes a customer
+    # as likely to return in month 4 as month 1, which flattens the curve.
+    signup_per_session = signup_dates.values[session_customer_idx]
+    window_seconds = (
+        (np.datetime64(end_date) - signup_per_session) / np.timedelta64(1, "s")
+    ).clip(min=0)
+    decay_seconds = rng.exponential(scale=45 * 86400, size=total_sessions)
+    # Clamping to the remaining window keeps every event inside the dataset
+    # period, so nothing is dated in the future.
+    session_start = signup_per_session + pd.to_timedelta(
+        np.minimum(decay_seconds, window_seconds).astype("int64"), unit="s"
     )
     ev_timestamp = pd.to_datetime(session_start[ev_session]) + pd.to_timedelta(offsets, unit="s")
 
