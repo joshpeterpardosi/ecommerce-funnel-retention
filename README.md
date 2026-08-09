@@ -17,6 +17,30 @@ Analytics pipeline and interactive 4-page Streamlit dashboard powered by **DuckD
 
 ---
 
+## 📈 Headline Results
+
+Produced by the current dataset (`scripts/generate_data.py`, seed 42) — these
+regenerate deterministically and are what the live dashboard displays.
+
+| Funnel stage | Unique customers | Cumulative | Step drop-off |
+|---|---:|---:|---:|
+| `page_view` | 25,000 | 100.00% | — |
+| `product_view` | 15,395 | 61.58% | 38.42% |
+| `add_to_cart` | 7,004 | 28.02% | 54.50% |
+| `checkout_start` | 3,558 | 14.23% | 49.20% |
+| `purchase` | 2,033 | 8.13% | 42.86% |
+
+- **$398,852.86** in completed revenue across **7,377** completed orders from **2,000** purchasing customers
+- **The steepest leak is `product_view` → `add_to_cart` (54.50%)**, the single largest recoverable drop in the journey
+- **113 Champions** (top RFM quartile on all three dimensions) average **$390.58** spend versus **$105.25** for the churned segment — a 3.7× gap
+- **54.2%** average month-1 cohort retention
+
+> These describe synthetic data whose conversion behaviour is configured, not
+> observed. They demonstrate that the pipeline computes the metrics correctly;
+> they are not findings about real customers.
+
+---
+
 ## 🏗️ Architecture Overview
 
 ```
@@ -145,19 +169,24 @@ python -m pytest -q
 
 ## ⚡ Performance Benchmark
 
-Query performance benchmark on 500,000 events + 25,000 customers + 20,000 transactions (reproducible via `scripts/benchmark.py`):
-- `funnel.sql` (Session Sequential Joins): ~180 ms
-- `cohort_retention.sql`: ~102 ms
-- `data_quality.sql`: ~47 ms
-- `rfm_segmentation.sql`: ~16 ms
-- **Pytest Suite Execution**: < 1.0s total
+Query performance on 507,928 events + 25,000 customers + 8,068 transactions
+(reproducible via `scripts/benchmark.py`):
+
+| Query | Latency |
+|---|---|
+| `funnel.sql` (5 sequential session joins + windowing) | ~175 ms |
+| `cohort_retention.sql` | ~119 ms |
+| `data_quality.sql` | ~60 ms |
+| `rfm_segmentation.sql` | ~13 ms |
+| **Full pytest suite (10 tests)** | **~1.3 s** |
 
 ---
 
 ## ⚠️ Limitations & Assumptions
 
 - **Synthetic Data**: All customer profiles, event logs, and purchase transactions are generated synthetically by `scripts/generate_data.py`. They have not been validated against real user traffic or production environments.
-- **Funnel Sequencing Assumption**: The funnel requires strict sequential ordering (`page_view` -> `product_view` -> `add_to_cart` -> `checkout_start` -> `purchase`) with monotonic timestamps within the same `session_id`. Because synthetic event timestamps are generated with random delays, sequential drop-off rates are higher than would typically occur in real user sessions.
+- **Funnel Sequencing Assumption**: The funnel credits a stage only when it occurs *after* the preceding stage within the same `session_id`. `scripts/generate_data.py` builds events session by session to satisfy this, assigning each customer a maximum stage they will ever reach so the distinct-customer funnel is stable regardless of session volume. Conversion rates are therefore a property of the generator's configured intent distribution, not a discovered insight.
+- **Device Attribution**: Device is treated as a fixed customer attribute rather than a per-session one, so the per-device funnels partition the customer base cleanly instead of counting a customer once per device they used.
 - **RFM Logic Assumptions**: RFM scores use equal 4-quantile splits (`NTILE(4)`) across the customer base. Segment labels (e.g. Champions, At Risk) are derived from relative quartile rankings rather than fixed business threshold rules.
 
 ---

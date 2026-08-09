@@ -19,9 +19,13 @@ rfm_scores AS (
         recency_days,
         frequency,
         monetary,
-        NTILE(4) OVER (ORDER BY recency_days DESC) AS r_score,
-        NTILE(4) OVER (ORDER BY frequency ASC) AS f_score,
-        NTILE(4) OVER (ORDER BY monetary ASC) AS m_score
+        -- customer_id breaks ties deterministically. Without it, tied rows
+        -- (frequency in particular is a small integer with heavy ties) land in
+        -- different quartiles depending on DuckDB's parallel execution order,
+        -- so segment counts vary between runs on identical data.
+        NTILE(4) OVER (ORDER BY recency_days DESC, customer_id) AS r_score,
+        NTILE(4) OVER (ORDER BY frequency ASC, customer_id) AS f_score,
+        NTILE(4) OVER (ORDER BY monetary ASC, customer_id) AS m_score
     FROM customer_rfm_raw
 ),
 rfm_segmented AS (

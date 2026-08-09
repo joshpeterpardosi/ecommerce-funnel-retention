@@ -251,6 +251,40 @@ def test_rfm_quartile_segmentation(tmp_path, monkeypatch):
     assert df["total_segment_revenue"].sum() == 360.0  # (8+7+...+1)*10
 
 
+def test_rfm_segmentation_is_deterministic(tmp_path, monkeypatch):
+    """Identical input must always produce identical segment counts.
+
+    frequency is a small integer with heavy ties, so without a tiebreaker in the
+    NTILE ORDER BY, tied customers land in different quartiles depending on
+    DuckDB's parallel execution order and the segment sizes drift between runs.
+    """
+    rows = []
+    txn = 0
+    for cust in range(40):
+        # Deliberately coarse values so many customers tie on every dimension.
+        n_txns = (cust % 4) + 1
+        for _ in range(n_txns):
+            txn += 1
+            rows.append(
+                {
+                    "transaction_id": f"T{txn:04d}",
+                    "customer_id": f"C{cust:03d}",
+                    "transaction_timestamp": pd.Timestamp("2025-06-01")
+                    - pd.Timedelta(days=cust % 5),
+                    "amount": 10.0 * ((cust % 3) + 1),
+                    "payment_method": "Credit Card",
+                    "status": "Completed",
+                }
+            )
+    write_fixture(tmp_path, transactions=pd.DataFrame(rows))
+    monkeypatch.chdir(tmp_path)
+
+    baseline = run_sql("rfm_segmentation.sql").sort_values("rfm_segment").reset_index(drop=True)
+    for _ in range(5):
+        again = run_sql("rfm_segmentation.sql").sort_values("rfm_segment").reset_index(drop=True)
+        pd.testing.assert_frame_equal(baseline, again)
+
+
 def test_rfm_ignores_non_completed_transactions(tmp_path, monkeypatch):
     rows = [
         {
