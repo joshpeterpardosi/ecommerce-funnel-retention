@@ -27,7 +27,7 @@ ecommerce-funnel-retention/
 │   ├── cohort_retention.sql   # Monthly user retention matrix (Cohort DATEDIFF)
 │   ├── rfm_segmentation.sql   # Customer segmentation (NTILE(4) quantiles)
 │   └── data_quality.sql       # Automated integrity & null checks
-├── src/                       # Core python analytics module
+├── src/                       # Pandas reference implementation (not used by the app)
 │   ├── __init__.py
 │   ├── funnel.py              # Vectorized conversion calculations
 │   └── retention.py           # Cohort matrix computation
@@ -36,6 +36,7 @@ ecommerce-funnel-retention/
 │   └── benchmark.py          # Reproducible DuckDB query performance benchmark
 ├── tests/                     # Automated pytest suite
 │   ├── __init__.py
+│   ├── test_sql_queries.py    # Correctness tests for the SQL powering the app
 │   ├── test_funnel.py
 │   └── test_retention.py
 ├── .streamlit/
@@ -57,6 +58,37 @@ ecommerce-funnel-retention/
 | **Cohort Retention** | [`sql/cohort_retention.sql`](sql/cohort_retention.sql) | `DATE_TRUNC('month')` + `DATEDIFF()` | Calculates monthly user retention decay matrices relative to initial join cohort. |
 | **RFM Segmentation** | [`sql/rfm_segmentation.sql`](sql/rfm_segmentation.sql) | `NTILE(4)` Window Quantiles | Categorizes customers into 4-quantile Recency, Frequency, and Monetary scores (Champions, Loyal, At Risk, Churned). |
 | **Data Quality Audit** | [`sql/data_quality.sql`](sql/data_quality.sql) | Multi-UNION Integrity Audit | Verifies zero null keys, orphan IDs, or invalid transaction amounts across Parquet files. |
+
+---
+
+## 🧪 Testing & The Two Implementations
+
+The dashboard runs **entirely on the DuckDB SQL** in `sql/`. Query execution pushes
+down into DuckDB's vectorized engine over zero-copy Parquet, which is why the
+whole 500k-event funnel resolves in ~180 ms.
+
+`src/funnel.py` and `src/retention.py` are a **standalone pandas reference
+implementation** of the same funnel and cohort logic. They are deliberately *not*
+imported by `app.py` — they exist to express the analytics in a second, independently
+readable form. Note that they are simplified: `src/funnel.py` counts unique users per
+stage without enforcing intra-session ordering, whereas `sql/funnel.sql` requires each
+stage to occur *after* the preceding one within the same `session_id`. The SQL is
+the authoritative implementation.
+
+| Test file | Covers | Approach |
+|---|---|---|
+| [`tests/test_sql_queries.py`](tests/test_sql_queries.py) | All 4 production SQL queries | Runs the real, unmodified `sql/*.sql` against tiny hand-built fixtures with known answers |
+| [`tests/test_funnel.py`](tests/test_funnel.py) | `src/funnel.py` | Unit test of the pandas reference implementation |
+| [`tests/test_retention.py`](tests/test_retention.py) | `src/retention.py` | Unit test of the pandas reference implementation |
+
+The SQL tests assert exact hand-computed values rather than smoke-testing shapes —
+including a regression test proving the referential-integrity audit uses `NOT EXISTS`,
+since a `NOT IN` subquery containing a single `NULL` silently reports **zero** orphans
+regardless of how many exist.
+
+```bash
+python -m pytest -q        # 10 tests, < 2s
+```
 
 ---
 
