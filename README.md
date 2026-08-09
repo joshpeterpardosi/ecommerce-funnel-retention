@@ -1,5 +1,6 @@
 # ⚡ E-Commerce Conversion Funnel & Customer Retention Analytics
 
+[![CI](https://github.com/joshpeterpardosi/ecommerce-funnel-retention/actions/workflows/ci.yml/badge.svg)](https://github.com/joshpeterpardosi/ecommerce-funnel-retention/actions/workflows/ci.yml)
 [![Live Dashboard](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-funnel-retention-aat6aktgvkewrzdttnofhh.streamlit.app/)
 
 Analytics pipeline and interactive 4-page Streamlit dashboard powered by **DuckDB**, **Parquet**, and **Plotly**. Analyzes user journey events, conversion stage drop-offs, monthly cohort decay curves, and RFM customer segmentation on synthetic data.
@@ -39,6 +40,8 @@ ecommerce-funnel-retention/
 │   ├── test_sql_queries.py    # Correctness tests for the SQL powering the app
 │   ├── test_funnel.py
 │   └── test_retention.py
+├── .github/workflows/
+│   └── ci.yml                 # Pytest matrix + end-to-end pipeline smoke test
 ├── .streamlit/
 │   └── config.toml            # Custom dark theme configuration
 ├── app.py                     # 4-Page interactive Streamlit dashboard
