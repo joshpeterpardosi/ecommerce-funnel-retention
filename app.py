@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 import duckdb
 import pandas as pd
@@ -25,13 +26,36 @@ def run_query(query_str: str) -> pd.DataFrame:
 def load_sql(filename: str) -> str:
     return Path(f"sql/{filename}").read_text(encoding="utf-8")
 
-if not Path("data/events.parquet").exists():
+GENERATOR = Path(__file__).parent / "scripts" / "generate_data.py"
+STAMP = Path("data/.dataset_version")
+
+
+def generator_fingerprint() -> str:
+    """Hash of the generator, so changing it invalidates the existing dataset."""
+    return hashlib.sha256(GENERATOR.read_bytes()).hexdigest()[:16]
+
+
+def dataset_is_current() -> bool:
+    if not Path("data/events.parquet").exists():
+        return False
+    # Streamlit Cloud keeps the container filesystem across redeploys, so an
+    # existence check alone would serve data built by an older generator
+    # forever. Compare fingerprints instead.
+    return STAMP.exists() and STAMP.read_text(encoding="utf-8").strip() == generator_fingerprint()
+
+
+if not dataset_is_current():
     import sys
-    sys.path.insert(0, str(Path(__file__).parent / "scripts"))
+
+    sys.path.insert(0, str(GENERATOR.parent))
     from generate_data import generate_datasets
 
-    st.info("Generating Parquet dataset (500k events)...")
+    st.info("Generating Parquet dataset (~500k events)...")
     generate_datasets()
+    STAMP.write_text(generator_fingerprint(), encoding="utf-8")
+    # Cached query results are keyed by SQL text, so they would survive the
+    # regeneration and keep serving figures from the previous dataset.
+    st.cache_data.clear()
     st.rerun()
 
 st.sidebar.title("⚡ Analytics")

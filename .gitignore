@@ -11,6 +11,7 @@ venv/
 # Data & Environment
 data/*.csv
 data/*.parquet
+data/.dataset_version
 !.gitkeep
 .env
 
