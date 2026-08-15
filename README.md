@@ -47,6 +47,16 @@ regenerate deterministically and are what the live dashboard displays.
 
 ## 🏗️ Architecture Overview
 
+Five decoupled layers. The dashboard runs SQL, the SQL reads Parquet directly —
+no database server in between. `src/` sits outside that path as a pandas
+restatement of the same analytics, kept honest by its own tests:
+
+```
+[Dashboard: app.py] ─ runs ─► [SQL: sql/*.sql] ─ reads ─► [Storage: data/*.parquet]
+
+[Package: src/*.py] ◄─ verified by ─ [Tests: tests/*.py] ─ also verify ─► [SQL: sql/*.sql]
+```
+
 ```
 ecommerce-funnel-retention/
 ├── data/                      # Parquet dataset storage (500k events, 25k customers)
@@ -118,7 +128,7 @@ since a `NOT IN` subquery containing a single `NULL` silently reports **zero** o
 regardless of how many exist.
 
 ```bash
-python -m pytest -q        # 10 tests, < 2s
+python -m pytest -q        # 11 tests, < 2s
 ```
 
 ---
@@ -182,7 +192,7 @@ Query performance on 507,928 events + 25,000 customers + 8,068 transactions
 | `cohort_retention.sql` | ~109 ms |
 | `data_quality.sql` | ~59 ms |
 | `rfm_segmentation.sql` | ~14 ms |
-| **Full pytest suite (10 tests)** | **~1.3 s** |
+| **Full pytest suite (11 tests)** | **~1.3 s** |
 
 ---
 
