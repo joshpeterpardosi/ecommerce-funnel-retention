@@ -26,3 +26,15 @@ graph.html
 graph.json
 project_visual_story.html
 
+
+# graphify output — local only, never pushed
+graphify-out/
+
+# Agent tooling — local only, never pushed
+.claude/
+.agents/
+.scratch/
+.hallmark/
+
+# Personal interview prep — local only, never pushed
+interview/
