@@ -1,4 +1,4 @@
-# ⚡ E-Commerce Conversion Funnel & Customer Retention Analytics
+# E-Commerce Conversion Funnel & Customer Retention Analytics
 
 [![CI](https://github.com/joshpeterpardosi/ecommerce-funnel-retention/actions/workflows/ci.yml/badge.svg)](https://github.com/joshpeterpardosi/ecommerce-funnel-retention/actions/workflows/ci.yml)
 [![Live Dashboard](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-funnel-retention-aat6aktgvkewrzdttnofhh.streamlit.app/)
@@ -13,7 +13,7 @@ Analytics pipeline and interactive 4-page Streamlit dashboard powered by **DuckD
 
 ---
 
-## 💡 Business Value & Analytics Overview
+## Business Value & Analytics Overview
 
 - **Revenue & Order Tracking**: Tracks completed transaction revenue and order volume synthesized across customer records.
 - **Funnel Drop-off Minimization**: Pinpoints sequential user friction points across 5 distinct journey stages (`page_view` -> `product_view` -> `add_to_cart` -> `checkout_start` -> `purchase`).
@@ -21,7 +21,7 @@ Analytics pipeline and interactive 4-page Streamlit dashboard powered by **DuckD
 
 ---
 
-## 📈 Headline Results
+## Headline Results
 
 Produced by the current dataset (`scripts/generate_data.py`, seed 42) — these
 regenerate deterministically and are what the live dashboard displays.
@@ -45,7 +45,7 @@ regenerate deterministically and are what the live dashboard displays.
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 Five decoupled layers. The dashboard runs SQL, the SQL reads Parquet directly —
 no database server in between. `src/` sits outside that path as a pandas
@@ -91,7 +91,7 @@ ecommerce-funnel-retention/
 
 ---
 
-## 📊 Analytics & DuckDB SQL Breakdown
+## Analytics & DuckDB SQL Breakdown
 
 | Query Module | File Path | Core Engine / Technique | Purpose |
 |---|---|---|---|
@@ -102,7 +102,7 @@ ecommerce-funnel-retention/
 
 ---
 
-## 🧪 Testing & The Two Implementations
+## Testing & The Two Implementations
 
 The dashboard runs **entirely on the DuckDB SQL** in `sql/`. Query execution pushes
 down into DuckDB's vectorized engine over zero-copy Parquet, which is why the
@@ -133,9 +133,9 @@ python -m pytest -q        # 11 tests, < 2s
 
 ---
 
-## 🖥️ Live Demo & Dashboard Interface
+## Live Demo & Dashboard Interface
 
-**▶️ [Launch the live dashboard](https://ecommerce-funnel-retention-aat6aktgvkewrzdttnofhh.streamlit.app/)** — no setup required.
+**▶ [Launch the live dashboard](https://ecommerce-funnel-retention-aat6aktgvkewrzdttnofhh.streamlit.app/)** — no setup required.
 
 Explore the 4 interactive views:
 1. **Overview & Data Quality Audit**
@@ -151,7 +151,7 @@ The dashboard opens at `http://localhost:8501`. On first launch it generates the
 
 ---
 
-## 🚀 Setup & Execution Guide
+## Setup & Execution Guide
 
 ### 1. Environment Setup
 ```bash
@@ -181,7 +181,7 @@ python -m pytest -q
 
 ---
 
-## ⚡ Performance Benchmark
+## Performance Benchmark
 
 Query performance on 507,928 events + 25,000 customers + 8,068 transactions
 (reproducible via `scripts/benchmark.py`):
@@ -196,7 +196,7 @@ Query performance on 507,928 events + 25,000 customers + 8,068 transactions
 
 ---
 
-## ⚠️ Limitations & Assumptions
+## Limitations & Assumptions
 
 - **Synthetic Data**: All customer profiles, event logs, and purchase transactions are generated synthetically by `scripts/generate_data.py`. They have not been validated against real user traffic or production environments.
 - **Funnel Sequencing Assumption**: The funnel credits a stage only when it occurs *after* the preceding stage within the same `session_id`. `scripts/generate_data.py` builds events session by session to satisfy this, assigning each customer a maximum stage they will ever reach so the distinct-customer funnel is stable regardless of session volume. Conversion rates are therefore a property of the generator's configured intent distribution, not a discovered insight.
@@ -206,5 +206,5 @@ Query performance on 507,928 events + 25,000 customers + 8,068 transactions
 
 ---
 
-## 📄 License
+## License
 Distributed under the [MIT License](LICENSE).
